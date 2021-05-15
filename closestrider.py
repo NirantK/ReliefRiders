@@ -1,4 +1,5 @@
 from numpy import expand_dims, float64
+from numpy.core.fromnumeric import sort
 import streamlit as st
 import pandas as pd
 from haversine import haversine
@@ -54,4 +55,5 @@ df = deepcopy(data)
 df["dist"] = df.apply(get_distance, axis=1)
 # st.dataframe(df)
 sorted_df = df.sort_values(by="dist", ascending=True)
+sorted_df = sorted_df[sorted_df.ACTIVE == "Yes"]
 st.table(sorted_df[:20])
