@@ -32,9 +32,9 @@ def load_data(
     return df
 
 # st.dataframe(df)
-help_lat = st.number_input(label="Request Lat", format="%f", value=12.96981)
-help_long = st.number_input(label="Request Long", format="%f", value=77.62914)
-help_loc = (float(help_lat), float(help_long))
+help_input = st.text_input(label="Request Location", value="13.064058531224338, 77.58758101599165", help="Enter lat, lon as comma separated value")
+help_loc = help_input.split(",")
+help_loc = (float(help_loc[0]), float(help_loc[1]))
 
 rider_count = 10
 st.subheader(f"Your {rider_count} Closest riders are:")
