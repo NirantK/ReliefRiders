@@ -29,6 +29,7 @@ def load_data(
     # df.lon = pd.to_numeric(df.lon)
     df.lat = df.lat.astype(float)
     df.lon = df.lon.astype(float)
+    df = df[df.ACTIVE == "Yes"]
     # st.text(df.dtypes)
     return df
 
@@ -55,5 +56,4 @@ df = deepcopy(data)
 df["dist"] = df.apply(get_distance, axis=1)
 # st.dataframe(df)
 sorted_df = df.sort_values(by="dist", ascending=True)
-sorted_df = sorted_df[sorted_df.ACTIVE == "Yes"]
 st.table(sorted_df[:20])
