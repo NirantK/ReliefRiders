@@ -7,7 +7,7 @@ from haversine import haversine
 st.title("Find Closest Relief Rider")
 
 
-@st.cache
+@st.cache(ttl=3600)
 def load_data(
     url="https://docs.google.com/spreadsheets/d/e/2PACX-1vR17ZMSIIDqLKh9YZC2poBM7ts-sP8Psntdg--zo8F5Tb2TfMzZ9AawaY4_x2rVP4nNZgI5ULFNZtpl/pub?gid=2123468107&single=true&output=csv",
 ):
