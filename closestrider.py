@@ -1,7 +1,9 @@
-from numpy import expand_dims, float64
-from numpy.core.fromnumeric import sort
-import streamlit as st
+# st.write(data.columns)
+# st.dataframe(data)
+from copy import deepcopy
+
 import pandas as pd
+import streamlit as st
 from haversine import haversine
 
 st.title("Find Closest Relief Rider")
@@ -41,9 +43,6 @@ def load_data(
 
 # Load data and make a copy
 data = load_data()
-# st.write(data.columns)
-# st.dataframe(data)
-from copy import deepcopy
 
 df = deepcopy(data)
 # st.dataframe(df)
