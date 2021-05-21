@@ -9,33 +9,46 @@ st.title("Find Closest Relief Rider")
 
 @st.cache(ttl=3600)
 def load_data(
-    url="https://docs.google.com/spreadsheets/d/e/2PACX-1vR17ZMSIIDqLKh9YZC2poBM7ts-sP8Psntdg--zo8F5Tb2TfMzZ9AawaY4_x2rVP4nNZgI5ULFNZtpl/pub?gid=2123468107&single=true&output=csv",
+    url="https://docs.google.com/spreadsheets/d/e/2PACX-1vR17ZMSIIDqLKh9YZC2poBM7ts-sP8Psntdg--zo8F5Tb2TfMzZ9AawaY4_x2rVP4nNZgI5ULFNZtpl/pub?gid=521576028&single=true&output=csv",
 ):
     df = pd.read_csv(url)
-    columns_of_interest = [
-        "Area",
-        "Name of Relief Rider",
-        "Phone number",
-        "ACTIVE",
-        "Location",
-    ]
     try:
-        df["Location"] = df["DO NOT FILL - GPS"]
-        df = df[columns_of_interest]
+        location_column_name = "GPS Coordinates of your location or Nearest Landmark"
+        df = df.rename(columns={location_column_name: "Location"})
     except KeyError as ke:
-        raise Exception(f"Expected the titles to be {columns_of_interest}.\n{ke}")
+        raise Exception(f"Did not find {location_column_name}.\n{ke}")
+
+    # Location Format Conversion
     df[["lat", "lon"]] = df["Location"].str.split(",", expand=True)
-    # st.text(df.dtypes)
-    # df.lat = pd.to_numeric(df.lat)
-    # df.lon = pd.to_numeric(df.lon)
     df.lat = df.lat.astype(float)
     df.lon = df.lon.astype(float)
-    df = df[df.ACTIVE == "Yes"]
-    # st.text(df.dtypes)
+
+    # Filter Data
+    df = df[df.Status == "Active"]
+    df = df.drop(
+        columns=[
+            "RIDER ID",
+            "Status",
+            "Blood",
+            "emergency",
+            "basket",
+            "email address",
+            "gender",
+        ]
+    )
     return df
 
 
+# Load data and make a copy
+data = load_data()
+# st.write(data.columns)
+# st.dataframe(data)
+from copy import deepcopy
+
+df = deepcopy(data)
 # st.dataframe(df)
+
+# Input
 help_input = st.text_input(
     label="Request Location",
     value="13.064058531224338, 77.58758101599165",
@@ -49,7 +62,7 @@ help_loc = (lat, lon)
 rider_count = 20
 st.subheader(f"Your {rider_count} Closest riders are:")
 
-
+# Compute
 def get_distance(row):
     loc = (row["lat"], row["lon"])
     dist = haversine(help_loc, loc)
@@ -57,12 +70,15 @@ def get_distance(row):
     return dist
 
 
-data = load_data()
-from copy import deepcopy
+# Main Data Render
+def sort_and_display(df: pd.DataFrame, rider_count: int):
+    df["Distance"] = df.apply(get_distance, axis=1)
+    sorted_df = df.sort_values(by="Distance", ascending=True)
+    sorted_df.set_index("Name of Relief Rider", inplace=True)
+    cols = sorted_df.columns.tolist()
+    columns = ["Distance", "Phone Number", "Area Covered"] + cols[2:-4]
+    sorted_df = sorted_df[columns]
+    return sorted_df[:rider_count]
 
-df = deepcopy(data)
-# st.dataframe(df)
-df["dist"] = df.apply(get_distance, axis=1)
-# st.dataframe(df)
-sorted_df = df.sort_values(by="dist", ascending=True)
-st.table(sorted_df[:rider_count])
+
+st.table(sort_and_display(df, rider_count=rider_count))
